@@ -2,8 +2,9 @@ import requests
 import time
 
 class PurpleSensor:
-    def __init__(self,URL):
+    def __init__(self,URL,logger):
         self.URL=URL
+        self.logger=logger
         self.last_update=0
         self.last_aqi='<div style="color: rgb(255,0,0);">Unknown</div>'
 
@@ -26,7 +27,8 @@ class PurpleSensor:
             r = requests.get(self.URL,timeout=30,stream=False)
             r.raise_for_status()
             data = r.json()
-        except:
+        except Exception as e:
+            self.logger.exception('Error fetching purple sensor data')
             if time.time() - self.last_update>900:
                 return '<div style="color: rgb(255,0,0);">Unknown</div>'
             else:
