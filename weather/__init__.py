@@ -42,7 +42,7 @@ class PirateWeather:
             f'<figcaption class="wi wi-thermometer">{weather_data["temperature"]:.1f}</figcaption>'
             f'<figcaption class="wi wi-humidity">{weather_data["humidity"]:.0%}</figcaption>'
             f'<i class="wi {PirateWeather.icon_mapping[weather_data["icon"]]}"></i>'
-            f'<figcaption class="weather-chance">{weather_data["precipProbability"]*100}</figcaption></figure></div>')
+            f'<figcaption class="weather-chance">{weather_data["precipProbability"]:.0%}</figcaption></figure></div>')
 
     @staticmethod
     def forecast_block(weather_data):
