@@ -6,7 +6,7 @@ class PurpleSensor:
         self.URL=URL
         self.logger=logger
         self.last_update=0
-        self.last_aqi='<div style="color: rgb(255,0,0);">Unknown</div>'
+        self.last_aqi='<div class="purple error">Unknown</div>'
 
     @staticmethod
     def average_colors(color1,color2):
@@ -30,12 +30,12 @@ class PurpleSensor:
         except Exception as e:
             self.logger.exception('Error fetching purple sensor data')
             if time.time() - self.last_update>900:
-                return '<div style="color: rgb(255,0,0);">Unknown</div>'
+                return '<div class="purple error">Error fetching AQI</div>'
             else:
                 return self.last_aqi
         if abs(data['pm2.5_aqi'] - data['pm2.5_aqi_b']) < 50:
-            self.last_aqi='<div style="color: %s;">%i</div>'%(self.average_colors(data['p25aqic'],data['p25aqic_b']),PurpleSensor.avg(data['pm2.5_aqi'],data['pm2.5_aqi_b']))
+            self.last_aqi='<div class="purple" style="color: %s;">%i</div>'%(self.average_colors(data['p25aqic'],data['p25aqic_b']),PurpleSensor.avg(data['pm2.5_aqi'],data['pm2.5_aqi_b']))
         else:
-            self.last_aqi='<div style="color: %s;">%i,%i</div>'%(self.average_colors(data['p25aqic'],data['p25aqic_b']),data['pm2.5_aqi'],data['pm2.5_aqi_b'])
+            self.last_aqi='<div class="purple" style="color: %s;">%i,%i</div>'%(self.average_colors(data['p25aqic'],data['p25aqic_b']),data['pm2.5_aqi'],data['pm2.5_aqi_b'])
         self.last_update=time.time()
         return self.last_aqi
