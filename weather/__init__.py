@@ -1,5 +1,6 @@
 import time
 import requests
+import bisect
 
 class PirateWeather:
 
@@ -37,12 +38,37 @@ class PirateWeather:
         return output
 
     @staticmethod
+    def color_temperature(temp):
+        colors={
+                10:(0,0,255),
+                21:(0,255,0),
+                26:(255,255,0),
+                32:(255,0,0)
+                }
+        color_indices=sorted(colors)
+        if temp in colors:
+            return colors[temp]
+        index=bisect.bisect(color_indices,temp)
+        if index == 0:
+            return colors[color_indices[0]]
+        if index == len(color_indices):
+            return colors[color_indices[-1]]
+        color1=colors[color_indices[index-1]]
+        color2=colors[color_indices[index]]
+        delta_color=color_indices[index]-color_indices[index-1]
+        delta_temp=temp-color_indices[index-1]
+        ratio=delta_temp/delta_color
+        return 'rgb('+','.join([str(int((color2[x]-color1[x])*ratio+color1[x])) for x in range(3)])+')'
+
+
+    @staticmethod
     def format_weather(weather_data,style):
-        return (f'<div class="{style}"><figure><figcaption class="weather-time">{time.strftime("%H:%M",time.localtime(weather_data["time"]))}</figcaption>'
-            f'<figcaption class="wi wi-thermometer">{weather_data["temperature"]:.1f}</figcaption>'
-            f'<figcaption class="wi wi-humidity">{weather_data["humidity"]:.0%}</figcaption>'
-            f'<i class="wi {PirateWeather.icon_mapping[weather_data["icon"]]}"></i>'
-            f'<figcaption class="weather-chance">{weather_data["precipProbability"]:.0%}</figcaption></figure></div>')
+        temperature_color=PirateWeather.color_temperature(weather_data['temperature'])
+        return (f'<div class="{style}"><div class="weather-time">{time.strftime("%H:%M",time.localtime(weather_data["time"]))}</div>'
+            f'<div style="color: {temperature_color};" class="wi wi-thermometer">{weather_data["temperature"]:.1f}</div>'
+            f'<div class="wi wi-humidity">{weather_data["humidity"]:.0%}</div>'
+            f'<div class="weather-icon wi {PirateWeather.icon_mapping[weather_data["icon"]]}"></div>'
+            f'<div class="weather-chance">{weather_data["precipProbability"]:.0%}</div></div>')
 
     @staticmethod
     def forecast_block(weather_data):
@@ -52,8 +78,7 @@ class PirateWeather:
             formatted_hours.append(PirateWeather.format_weather(hour,style="weather-hourly"))
         return '<div class="weather-forecast">'+('<div class="weather-divider"></div>'.join(formatted_hours))+'</div>'
 
-    @staticmethod
-    def return_error():
+    def return_error(self):
         if time.time() - self.last_update > 1800:
             self.last_data='%s<div class="weather error">Weather fetch failure.</div>'%self.format_alerts(self.alerts)
         return self.last_data
